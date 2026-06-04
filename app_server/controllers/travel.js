@@ -1,14 +1,28 @@
-const fs = require('fs');
-
-/* Read trips JSON data */
-const trips = JSON.parse(fs.readFileSync('./data/trips.json', 'utf8'));
-
 /* GET travel page */
-var travel = (req, res) => {
-    res.render('travel', {
-        title: 'Travel',
-        trips
-    });
+const travel = async (req, res) => {
+    const URL = 'http://localhost:3000/api/trips';
+
+    try {
+        const response = await fetch(URL);
+        const trips = await response.json();
+
+        let message = null;
+
+        if (!(trips instanceof Array)) {
+            message = 'API lookup error';
+        } else if (!trips.length) {
+            message = 'No trips exist in our database';
+        }
+
+        res.render('travel', {
+            title: 'Travel',
+            trips,
+            message
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).send(err.message);
+    }
 };
 
 module.exports = {
