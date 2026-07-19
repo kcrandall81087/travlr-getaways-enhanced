@@ -4,7 +4,7 @@
 
 Travlr Getaways Enhanced is a full-stack travel management application developed as the Software Design and Engineering enhancement for the Southern New Hampshire University (SNHU) CS-499 Computer Science Capstone.
 
-The application builds upon the original CS-465 Full Stack Development I project by improving the software architecture, user experience, security, maintainability, and overall code quality while preserving the application's core functionality.
+The project builds upon the original CS-465 Full Stack Development I artifact by improving the software architecture, security, maintainability, user experience, and overall code quality while preserving the application's original functionality.
 
 The application consists of:
 
@@ -12,20 +12,22 @@ The application consists of:
 - An Angular administrative single-page application (SPA)
 - A RESTful API built with Express.js
 - A MongoDB database for storing trip information and user accounts
-- JWT-based authentication for administrative functions
+- JWT-based authentication for protected administrative operations
 
 ---
 
-# Original Application
+# Original Artifact
 
-The original application allowed users to:
+The original artifact was developed during CS-465: Full Stack Development I.
+
+The application provided the ability to:
 
 - View available travel packages
 - Authenticate as an administrator
 - Add new trips
 - Edit existing trips
 
-While functional, the original project contained opportunities to improve:
+While the original implementation successfully demonstrated full-stack development concepts, several opportunities existed to improve software quality, including:
 
 - Error handling
 - Input validation
@@ -33,9 +35,10 @@ While functional, the original project contained opportunities to improve:
 - Configuration management
 - User experience
 - Responsive design
-- Application architecture
+- Code organization
+- Maintainability
 
-These areas became the focus of the software engineering enhancement.
+These areas became the focus of the CS-499 Software Design and Engineering enhancement.
 
 ---
 
@@ -54,24 +57,26 @@ These areas became the focus of the software engineering enhancement.
 ### API Validation
 
 - Implemented reusable request validation middleware
+- Added centralized validation for trip creation and updates
 - Improved validation error responses
-- Added consistent validation for trip creation and updates
+- Standardized request validation across protected endpoints
 
 ### Error Handling
 
 - Implemented centralized API error handling
 - Added reusable `AppError` class
-- Added asynchronous request wrapper
-- Added API-specific 404 responses
-- Improved error consistency throughout the application
+- Added asynchronous controller wrapper
+- Added API-specific JSON 404 responses
+- Improved consistency of error responses throughout the application
 
-### Authentication
+### Authentication & Security
 
 - Improved JWT validation
 - Improved Bearer token handling
 - Added duplicate account detection
 - Separated user registration from user login
 - Added guest route protection
+- Improved authentication workflow and error handling
 
 ---
 
@@ -99,8 +104,18 @@ These areas became the focus of the software engineering enhancement.
 - Improved client-side validation
 - Disabled submit buttons while processing
 - Better validation feedback
-- Dedicated login page
-- Dedicated registration page
+- Dedicated Login page
+- Dedicated Registration page
+
+---
+
+## Customer Website Improvements
+
+- Removed duplicate static travel page
+- Updated customer travel page to retrieve trip data dynamically through the REST API
+- Updated navigation to use the dynamic `/travel` route
+- Fixed broken navigation links
+- Consolidated customer and administrative applications to consume the same backend data source
 
 ---
 
@@ -111,15 +126,15 @@ These areas became the focus of the software engineering enhancement.
 - Angular 17
 - TypeScript
 - Bootstrap
-- HTML
-- CSS
+- HTML5
+- CSS3
 
 ## Backend
 
 - Node.js
 - Express.js
 - Passport.js
-- JWT Authentication
+- JSON Web Tokens (JWT)
 
 ## Database
 
@@ -131,32 +146,32 @@ These areas became the focus of the software engineering enhancement.
 # Application Architecture
 
 ```
-Angular SPA
-        │
-        ▼
- REST API (Express)
-        │
- Authentication
- Validation
- Error Handling
-        │
-        ▼
-MongoDB Database
+                 MongoDB
+                    ▲
+                    │
+             Express REST API
+                    ▲
+         ┌──────────┴──────────┐
+         │                     │
+Customer Website         Angular Admin SPA
+(Handlebars)             (Angular 17)
 ```
 
-The customer-facing website communicates with the same REST API used by the Angular administrative application. Administrative requests require JWT authentication before protected endpoints are processed.
+Both the customer-facing website and the Angular administrative application retrieve trip information through the same REST API.
+
+Administrative operations require JWT authentication before protected endpoints are processed, improving security while reducing duplicate application logic.
 
 ---
 
 # Authentication Flow
 
 1. User registers for an account.
-2. User logs in using email and password.
-3. Server validates credentials.
-4. JWT token is returned.
-5. Token is stored locally.
+2. User logs in using an email address and password.
+3. The server validates the supplied credentials.
+4. A JWT is generated and returned.
+5. The token is securely stored in browser storage.
 6. Protected API requests include the Bearer token.
-7. Server validates the token before allowing administrative operations.
+7. The server validates the token before allowing administrative operations.
 
 ---
 
@@ -166,8 +181,8 @@ The customer-facing website communicates with the same REST API used by the Angu
 |---------|----------|-------------|
 | GET | `/api/trips` | Retrieve all trips |
 | GET | `/api/trips/:tripCode` | Retrieve a specific trip |
-| POST | `/api/login` | Authenticate user |
-| POST | `/api/register` | Register new user |
+| POST | `/api/login` | Authenticate a user |
+| POST | `/api/register` | Register a new user |
 | POST | `/api/trips` | Create a trip (authenticated) |
 | PUT | `/api/trips/:tripCode` | Update a trip (authenticated) |
 
@@ -184,17 +199,19 @@ MONGODB_URI=mongodb://localhost/travlr
 JWT_SECRET=your-secret-key
 ```
 
+A sample configuration file is included as `.env.example`.
+
 ---
 
 # Installation
 
-Install project dependencies.
+Install backend dependencies:
 
 ```bash
 npm install
 ```
 
-Install Angular dependencies.
+Install Angular dependencies:
 
 ```bash
 cd app_admin
@@ -205,13 +222,13 @@ npm install
 
 # Running the Application
 
-Start the Express server.
+Start the Express server:
 
 ```bash
 npm start
 ```
 
-Start the Angular administrative application.
+Start the Angular administrative application:
 
 ```bash
 cd app_admin
@@ -226,7 +243,7 @@ Customer Website
 http://localhost:3000
 ```
 
-Angular Administrator
+Angular Administration
 
 ```
 http://localhost:4200
@@ -236,36 +253,39 @@ http://localhost:4200
 
 # Testing
 
-The enhanced application was tested using:
+The enhanced application was validated through:
 
 - Manual functional testing
 - Authentication testing
+- Registration testing
 - CRUD testing
 - Responsive layout testing
 - Protected route testing
 - API validation testing
-- Error handling verification
+- Centralized error handling verification
+- Customer website integration testing
 
 ---
 
 # Future Enhancements
 
-Planned future enhancements include:
+Potential future enhancements include:
 
 - Search, filtering, and pagination
+- Administrative dashboards
+- Trip categories
+- User reviews and ratings
 - Advanced MongoDB indexing
 - Aggregation queries
-- Trip categories
-- User reviews
-- Administrative dashboards
+- Role-based authorization
 
-These enhancements will be implemented as part of future capstone milestones.
+These features are outside the scope of the Software Design and Engineering enhancement and may be implemented in future iterations of the project.
 
 ---
 
 # Author
 
-Kevin Crandall
+**Kevin Crandall**
 
 Bachelor of Science – Computer Science
 
