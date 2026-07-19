@@ -1,30 +1,53 @@
 <!DOCTYPE html>
-<!-- Website template by freewebsitetemplates.com -->
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Dive Sites - Bhaccasyoniztas Beach Resort Website Template</title>
+	<title>Travel Packages - Travlr Getaways</title>
 	<link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
 	<div id="background">
 		<div id="page">
 			{{> header }}
+
 			<div id="contents">
 				<div class="box">
 					<div>
 						<div class="body">
-							<h1>Travel</h1>
+							<h1>Travel Packages</h1>
+
 							<ul id="sites">
 								{{#if message}}
-									<li>{{message}}</li>
+									<li>
+										<p>{{message}}</p>
+									</li>
 								{{else}}
 									{{#each trips}}
-									<li>
-										<a href="/api/trips/{{this.code}}"><img src="images/{{this.image}}" alt="{{this.name}}"></a>
-										<h2><a href="/travel">{{this.name}}</a></h2>
-										<p>{{this.description}}</p>
-									</li>
+										<li>
+											<img
+												src="/images/{{this.image}}"
+												alt="{{this.name}}">
+
+											<h2>{{this.name}}</h2>
+
+											<p>
+												<strong>Resort:</strong>
+												{{this.resort}}
+											</p>
+
+											<p>
+												<strong>Duration:</strong>
+												{{this.length}}
+											</p>
+
+											<p>
+												<strong>Price:</strong>
+												${{this.perPerson}} per person
+											</p>
+
+											<p>{{this.description}}</p>
+										</li>
 									{{/each}}
 								{{/if}}
 							</ul>
@@ -33,6 +56,7 @@
 				</div>
 			</div>
 		</div>
+
 		{{> footer }}
 	</div>
 </body>
