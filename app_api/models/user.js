@@ -32,13 +32,21 @@ userSchema.methods.validPassword = function(password) {
 };
 
 userSchema.methods.generateJWT = function() {
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!jwtSecret) {
+    throw new Error(
+      'JWT_SECRET is not configured. Add it to the project .env file.'
+    );
+  }
+
   return jwt.sign(
     {
       _id: this._id,
       email: this.email,
-      name: this.name,
+      name: this.name
     },
-    process.env.JWT_SECRET,
+    jwtSecret,
     { expiresIn: '1h' }
   );
 };

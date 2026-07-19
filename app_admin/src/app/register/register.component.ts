@@ -7,23 +7,25 @@ import { AuthenticationService } from '../services/authentication.service';
 import { User } from '../models/user';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
     RouterModule
   ],
-  templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  templateUrl: './register.component.html',
+  styleUrl: './register.component.css'
 })
-export class LoginComponent {
+export class RegisterComponent {
   public formError = '';
   public isSubmitting = false;
 
   public credentials = {
+    name: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   };
 
   constructor(
@@ -31,23 +33,33 @@ export class LoginComponent {
     private authenticationService: AuthenticationService
   ) {}
 
-  public onLoginSubmit(): void {
+  public onRegisterSubmit(): void {
     this.formError = '';
 
-    if (!this.credentials.email || !this.credentials.password) {
-      this.formError = 'Email and password are required.';
+    if (
+      !this.credentials.name ||
+      !this.credentials.email ||
+      !this.credentials.password ||
+      !this.credentials.confirmPassword
+    ) {
+      this.formError = 'All fields are required.';
+      return;
+    }
+
+    if (this.credentials.password !== this.credentials.confirmPassword) {
+      this.formError = 'Passwords do not match.';
       return;
     }
 
     this.isSubmitting = true;
 
     const user = {
-      email: this.credentials.email,
-      name: ''
+      name: this.credentials.name,
+      email: this.credentials.email
     } as User;
 
     this.authenticationService
-      .login(user, this.credentials.password)
+      .register(user, this.credentials.password)
       .subscribe({
         next: () => {
           this.isSubmitting = false;
@@ -57,7 +69,7 @@ export class LoginComponent {
           this.isSubmitting = false;
           this.formError =
             error?.error?.message ??
-            'Unable to log in. Check your email and password.';
+            'Unable to create the account.';
         }
       });
   }

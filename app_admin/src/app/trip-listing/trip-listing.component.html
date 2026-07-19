@@ -1,9 +1,42 @@
-<div *ngIf="isLoggedIn()">
-  <button (click)="addTrip()" class="btn btn-info">Add Trip</button>
-</div>
+<section class="trip-listing">
+  <div class="trip-listing-header">
+    <div>
+      <h1>Travel Packages</h1>
+      <p class="trip-listing-subtitle">
+        Review and manage the available destinations.
+      </p>
+    </div>
 
-<div class="row">
-  <div *ngFor="let trip of trips" class="col-md-4">
-    <app-trip-card [trip]="trip" class="card-deck mt-2"></app-trip-card>
+    <button
+      *ngIf="isLoggedIn()"
+      type="button"
+      class="btn btn-primary"
+      (click)="addTrip()">
+      Add Trip
+    </button>
   </div>
-</div>
+
+  <div *ngIf="trips?.length; else noTrips" class="trip-grid">
+    <app-trip-card
+      *ngFor="let trip of trips"
+      [trip]="trip">
+    </app-trip-card>
+  </div>
+
+  <ng-template #noTrips>
+    <div class="empty-state">
+      <h2>No trips available</h2>
+      <p>
+        Travel packages will appear here after they are added.
+      </p>
+
+      <button
+        *ngIf="isLoggedIn()"
+        type="button"
+        class="btn btn-primary"
+        (click)="addTrip()">
+        Add the First Trip
+      </button>
+    </div>
+  </ng-template>
+</section>

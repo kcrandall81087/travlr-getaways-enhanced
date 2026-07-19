@@ -1,0 +1,16 @@
+:host {
+    display: block;
+    min-height: 100vh;
+    background-color: #f5f7fa;
+}
+
+.app-shell {
+    min-height: calc(100vh - 76px);
+    padding: 2rem 0 3rem;
+}
+
+@media (max-width: 576px) {
+    .app-shell {
+        padding: 1.25rem 0 2rem;
+    }
+}

@@ -1,71 +1,63 @@
 const mongoose = require('mongoose');
+const asyncHandler = require('../utils/asyncHandler');
+const AppError = require('../utils/AppError');
+
 require('../models/travlr');
 
 const Trip = mongoose.model('trips');
 
-const tripsList = async (req, res) => {
-    try {
-        const trips = await Trip.find({});
-        res.status(200).json(trips);
-    } catch (err) {
-        res.status(404).json(err);
+const tripsList = asyncHandler(async (req, res) => {
+  const trips = await Trip.find({});
+
+  return res.status(200).json(trips);
+});
+
+const tripsFindCode = asyncHandler(async (req, res) => {
+  const trip = await Trip.findOne({
+    code: req.params.tripCode
+  });
+
+  if (!trip) {
+    throw new AppError(
+      `Trip with code '${req.params.tripCode}' was not found.`,
+      404
+    );
+  }
+
+  return res.status(200).json(trip);
+});
+
+const tripsAddTrip = asyncHandler(async (req, res) => {
+  const trip = await Trip.create(req.validatedTrip);
+
+  return res.status(201).json(trip);
+});
+
+const tripsUpdateTrip = asyncHandler(async (req, res) => {
+  const trip = await Trip.findOneAndUpdate(
+    {
+      code: req.params.tripCode
+    },
+    req.validatedTrip,
+    {
+      new: true,
+      runValidators: true
     }
-};
+  );
 
-const tripsFindCode = async (req, res) => {
-    try {
-        const trip = await Trip.findOne({ code: req.params.tripCode });
-        res.status(200).json(trip);
-    } catch (err) {
-        res.status(404).json(err);
-    }
-};
+  if (!trip) {
+    throw new AppError(
+      `Trip with code '${req.params.tripCode}' was not found.`,
+      404
+    );
+  }
 
-const tripsAddTrip = async (req, res) => {
-    try {
-        const trip = await Trip.create({
-            code: req.body.code,
-            name: req.body.name,
-            length: req.body.length,
-            start: req.body.start,
-            resort: req.body.resort,
-            perPerson: req.body.perPerson,
-            image: req.body.image,
-            description: req.body.description
-        });
-
-        res.status(201).json(trip);
-    } catch (err) {
-        res.status(400).json(err);
-    }
-};
-
-const tripsUpdateTrip = async (req, res) => {
-    try {
-        const trip = await Trip.findOneAndUpdate(
-            { code: req.params.tripCode },
-            {
-                code: req.body.code,
-                name: req.body.name,
-                length: req.body.length,
-                start: req.body.start,
-                resort: req.body.resort,
-                perPerson: req.body.perPerson,
-                image: req.body.image,
-                description: req.body.description
-            },
-            { new: true }
-        );
-
-        res.status(200).json(trip);
-    } catch (err) {
-        res.status(400).json(err);
-    }
-};
+  return res.status(200).json(trip);
+});
 
 module.exports = {
-    tripsList,
-    tripsFindCode,
-    tripsAddTrip,
-    tripsUpdateTrip
+  tripsList,
+  tripsFindCode,
+  tripsAddTrip,
+  tripsUpdateTrip
 };
