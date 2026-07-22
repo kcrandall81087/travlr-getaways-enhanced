@@ -16,22 +16,197 @@
     </button>
   </div>
 
-  <div *ngIf="trips?.length; else noTrips" class="trip-grid">
-    <app-trip-card
-      *ngFor="let trip of trips"
-      [trip]="trip">
-    </app-trip-card>
+  <div class="trip-controls">
+    <div class="search-control">
+      <label for="trip-search">Search trips</label>
+
+      <input
+        id="trip-search"
+        type="search"
+        class="form-control"
+        placeholder="Search by name, resort, or description"
+        [(ngModel)]="searchTerm"
+        (keyup.enter)="searchTrips()">
+    </div>
+
+    <div class="filter-control">
+      <label for="minimum-price">Minimum price</label>
+
+      <input
+        id="minimum-price"
+        type="number"
+        class="form-control"
+        min="0"
+        step="1"
+        placeholder="Minimum"
+        [(ngModel)]="minPrice"
+        (keyup.enter)="searchTrips()">
+    </div>
+
+    <div class="filter-control">
+      <label for="maximum-price">Maximum price</label>
+
+      <input
+        id="maximum-price"
+        type="number"
+        class="form-control"
+        min="0"
+        step="1"
+        placeholder="Maximum"
+        [(ngModel)]="maxPrice"
+        (keyup.enter)="searchTrips()">
+    </div>
+
+    <div class="filter-control">
+      <label for="trip-duration">Duration</label>
+
+      <input
+        id="trip-duration"
+        type="search"
+        class="form-control"
+        placeholder="Example: 4 nights"
+        [(ngModel)]="duration"
+        (keyup.enter)="searchTrips()">
+    </div>
+
+    <div class="sort-control">
+      <label for="trip-sort">Sort trips</label>
+
+      <select
+        id="trip-sort"
+        class="form-select"
+        [(ngModel)]="selectedSort"
+        (change)="sortTrips()">
+        <option value="name">Name: A to Z</option>
+        <option value="-name">Name: Z to A</option>
+        <option value="resort">Resort: A to Z</option>
+        <option value="-resort">Resort: Z to A</option>
+        <option value="length">Duration: Shortest First</option>
+        <option value="-length">Duration: Longest First</option>
+        <option value="perPerson">Price: Low to High</option>
+        <option value="-perPerson">Price: High to Low</option>
+      </select>
+    </div>
+
+    <div class="filter-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="searchTrips()">
+        Apply Filters
+      </button>
+
+      <button
+        *ngIf="
+          searchTerm ||
+          minPrice !== null ||
+          maxPrice !== null ||
+          duration ||
+          selectedSort !== 'name'
+        "
+        type="button"
+        class="btn btn-secondary"
+        (click)="clearSearch()">
+        Clear Filters
+      </button>
+    </div>
   </div>
+
+  <p
+    *ngIf="message && !isLoading"
+    class="trip-results-message"
+    aria-live="polite">
+    {{ message }}
+  </p>
+
+  <div
+    *ngIf="isLoading"
+    class="loading-state"
+    aria-live="polite">
+    <p>Loading travel packages...</p>
+  </div>
+
+  <ng-container *ngIf="!isLoading">
+    <div
+      *ngIf="trips.length > 0; else noTrips"
+      class="trip-grid">
+
+      <app-trip-card
+        *ngFor="let trip of trips"
+        [trip]="trip">
+      </app-trip-card>
+    </div>
+
+    <nav
+      *ngIf="pagination.totalPages > 1"
+      class="pagination-controls"
+      aria-label="Travel package pages">
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="!pagination.hasPreviousPage"
+        (click)="previousPage()">
+        Previous
+      </button>
+
+      <span class="pagination-summary">
+        Page {{ pagination.page }} of {{ pagination.totalPages }}
+      </span>
+
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="!pagination.hasNextPage"
+        (click)="nextPage()">
+        Next
+      </button>
+    </nav>
+  </ng-container>
 
   <ng-template #noTrips>
     <div class="empty-state">
-      <h2>No trips available</h2>
-      <p>
-        Travel packages will appear here after they are added.
+      <h2>No trips found</h2>
+
+      <p
+        *ngIf="
+          searchTerm ||
+          minPrice !== null ||
+          maxPrice !== null ||
+          duration;
+          else noStoredTrips
+        ">
+        No travel packages matched your current filters.
       </p>
 
+      <ng-template #noStoredTrips>
+        <p>
+          Travel packages will appear here after they are added.
+        </p>
+      </ng-template>
+
       <button
-        *ngIf="isLoggedIn()"
+        *ngIf="
+          searchTerm ||
+          minPrice !== null ||
+          maxPrice !== null ||
+          duration ||
+          selectedSort !== 'name'
+        "
+        type="button"
+        class="btn btn-secondary"
+        (click)="clearSearch()">
+        Clear Filters
+      </button>
+
+      <button
+        *ngIf="
+          isLoggedIn() &&
+          !searchTerm &&
+          minPrice === null &&
+          maxPrice === null &&
+          !duration
+        "
         type="button"
         class="btn btn-primary"
         (click)="addTrip()">

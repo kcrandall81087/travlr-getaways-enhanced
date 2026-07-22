@@ -2,9 +2,9 @@
 
 ## Overview
 
-Travlr Getaways Enhanced is a full-stack travel management application developed as the Software Design and Engineering enhancement for the Southern New Hampshire University (SNHU) CS-499 Computer Science Capstone.
+Travlr Getaways Enhanced is a full-stack travel management application developed as the primary artifact for the Southern New Hampshire University (SNHU) CS-499 Computer Science Capstone.
 
-The project builds upon the original CS-465 Full Stack Development I artifact by improving the software architecture, security, maintainability, user experience, and overall code quality while preserving the application's original functionality.
+The project builds upon the original CS-465 Full Stack Development I artifact through a series of enhancements focused on Software Design and Engineering, Algorithms and Data Structures, and Database design. These enhancements improve the application's architecture, maintainability, performance, security, and overall user experience while preserving its original functionality.
 
 The application consists of:
 
@@ -18,7 +18,7 @@ The application consists of:
 
 # Original Artifact
 
-The original artifact was developed during CS-465: Full Stack Development I.
+The original artifact was developed during **CS-465: Full Stack Development I**.
 
 The application provided the ability to:
 
@@ -37,12 +37,29 @@ While the original implementation successfully demonstrated full-stack developme
 - Responsive design
 - Code organization
 - Maintainability
+- Query performance
 
-These areas became the focus of the CS-499 Software Design and Engineering enhancement.
+These opportunities became the foundation for the CS-499 enhancement milestones.
 
 ---
 
-# Software Engineering Enhancements
+# Enhancement Timeline
+
+## ✅ Software Design & Engineering
+
+Focused on improving application quality, maintainability, security, and user experience.
+
+## ✅ Algorithms & Data Structures
+
+Focused on improving data retrieval efficiency through server-side searching, filtering, sorting, and pagination.
+
+## ⏳ Database (Upcoming)
+
+Will focus on improving the MongoDB schema, query performance, and data modeling.
+
+---
+
+# Software Design & Engineering Enhancements
 
 ## Backend Improvements
 
@@ -119,6 +136,39 @@ These areas became the focus of the CS-499 Software Design and Engineering enhan
 
 ---
 
+# Algorithms & Data Structures Enhancement
+
+The second enhancement focused on improving the efficiency of retrieving and processing trip information. Rather than returning all trip data and performing operations on the client, the application now performs searching, filtering, sorting, and pagination on the server through the REST API and MongoDB.
+
+## Backend Improvements
+
+- Implemented server-side searching across trip name, resort, and description
+- Added server-side filtering by minimum price, maximum price, and trip duration
+- Implemented server-side sorting by:
+  - Trip name
+  - Resort
+  - Duration
+  - Price
+- Added server-side pagination with metadata
+- Added validation for search and filter parameters
+- Implemented aggregation-based numeric sorting for price and duration while maintaining compatibility with the existing database schema
+- Improved API scalability by reducing unnecessary client-side processing
+
+## User Experience Improvements
+
+Both the Angular administrative application and the customer-facing website now support:
+
+- Search
+- Price filtering
+- Duration filtering
+- Server-side sorting
+- Server-side pagination
+- Improved empty-state messaging
+- Preserved filter state across pagination
+- Consistent querying behavior across both application interfaces
+
+---
+
 # Technology Stack
 
 ## Frontend
@@ -128,6 +178,7 @@ These areas became the focus of the CS-499 Software Design and Engineering enhan
 - Bootstrap
 - HTML5
 - CSS3
+- Handlebars
 
 ## Backend
 
@@ -154,7 +205,7 @@ These areas became the focus of the CS-499 Software Design and Engineering enhan
          ┌──────────┴──────────┐
          │                     │
 Customer Website         Angular Admin SPA
-(Handlebars)             (Angular 17)
+ (Handlebars)             (Angular 17)
 ```
 
 Both the customer-facing website and the Angular administrative application retrieve trip information through the same REST API.
@@ -179,7 +230,7 @@ Administrative operations require JWT authentication before protected endpoints 
 
 | Method | Endpoint | Description |
 |---------|----------|-------------|
-| GET | `/api/trips` | Retrieve all trips |
+| GET | `/api/trips` | Retrieve trips with optional searching, filtering, sorting, and pagination |
 | GET | `/api/trips/:tripCode` | Retrieve a specific trip |
 | POST | `/api/login` | Authenticate a user |
 | POST | `/api/register` | Register a new user |
@@ -235,15 +286,15 @@ cd app_admin
 ng serve
 ```
 
-Application URLs:
+Application URLs
 
-Customer Website
+### Customer Website
 
 ```
 http://localhost:3000
 ```
 
-Angular Administration
+### Angular Administration
 
 ```
 http://localhost:4200
@@ -259,27 +310,36 @@ The enhanced application was validated through:
 - Authentication testing
 - Registration testing
 - CRUD testing
-- Responsive layout testing
-- Protected route testing
+- Server-side search testing
+- Server-side filtering testing
+- Server-side sorting testing
+- Server-side pagination testing
 - API validation testing
+- Protected route testing
 - Centralized error handling verification
 - Customer website integration testing
+- Responsive layout testing
 
 ---
 
 # Future Enhancements
 
-Potential future enhancements include:
+The next planned enhancement focuses on improving the application's database design and performance through:
 
-- Search, filtering, and pagination
+- Converting price fields to numeric data types
+- Redesigning trip duration storage using numeric values
+- MongoDB schema optimization
+- Database indexing
+- Query optimization
+- Aggregation pipeline improvements
+
+Additional future enhancements may include:
+
 - Administrative dashboards
 - Trip categories
 - User reviews and ratings
-- Advanced MongoDB indexing
-- Aggregation queries
 - Role-based authorization
-
-These features are outside the scope of the Software Design and Engineering enhancement and may be implemented in future iterations of the project.
+- Reporting and analytics
 
 ---
 

@@ -17,40 +17,195 @@
 						<div class="body">
 							<h1>Travel Packages</h1>
 
+							<form
+								method="GET"
+								action="/travel"
+								class="travel-search">
+
+								<div>
+									<label for="travel-search">
+										Search
+									</label>
+
+									<input
+										id="travel-search"
+										type="text"
+										name="search"
+										placeholder="Search destinations..."
+										value="{{search}}">
+								</div>
+
+								<div>
+									<label for="minimum-price">
+										Minimum Price
+									</label>
+
+									<input
+										id="minimum-price"
+										type="number"
+										name="minPrice"
+										min="0"
+										step="1"
+										placeholder="Minimum"
+										value="{{minPrice}}">
+								</div>
+
+								<div>
+									<label for="maximum-price">
+										Maximum Price
+									</label>
+
+									<input
+										id="maximum-price"
+										type="number"
+										name="maxPrice"
+										min="0"
+										step="1"
+										placeholder="Maximum"
+										value="{{maxPrice}}">
+								</div>
+
+								<div>
+									<label for="travel-duration">
+										Duration
+									</label>
+
+									<input
+										id="travel-duration"
+										type="text"
+										name="duration"
+										placeholder="Example: 4 nights"
+										value="{{duration}}">
+								</div>
+
+								<div>
+									<label for="travel-sort">
+										Sort
+									</label>
+
+									<select
+										id="travel-sort"
+										name="sort"
+										onchange="this.form.submit()">
+
+										<option
+											value="name"
+											{{#if (eq sort "name")}}selected{{/if}}>
+											Name (A-Z)
+										</option>
+
+										<option
+											value="-name"
+											{{#if (eq sort "-name")}}selected{{/if}}>
+											Name (Z-A)
+										</option>
+
+										<option
+											value="resort"
+											{{#if (eq sort "resort")}}selected{{/if}}>
+											Resort (A-Z)
+										</option>
+
+										<option
+											value="-resort"
+											{{#if (eq sort "-resort")}}selected{{/if}}>
+											Resort (Z-A)
+										</option>
+
+										<option
+											value="length"
+											{{#if (eq sort "length")}}selected{{/if}}>
+											Duration (Shortest)
+										</option>
+
+										<option
+											value="-length"
+											{{#if (eq sort "-length")}}selected{{/if}}>
+											Duration (Longest)
+										</option>
+
+										<option
+											value="perPerson"
+											{{#if (eq sort "perPerson")}}selected{{/if}}>
+											Price (Low-High)
+										</option>
+
+										<option
+											value="-perPerson"
+											{{#if (eq sort "-perPerson")}}selected{{/if}}>
+											Price (High-Low)
+										</option>
+									</select>
+								</div>
+
+								<div class="travel-search-actions">
+									<button type="submit">
+										Apply Filters
+									</button>
+
+									{{#if hasActiveFilters}}
+										<a href="/travel">
+											Clear Filters
+										</a>
+									{{/if}}
+								</div>
+							</form>
+
+							{{#if message}}
+								<p>{{message}}</p>
+							{{/if}}
+
 							<ul id="sites">
-								{{#if message}}
+								{{#each trips}}
 									<li>
-										<p>{{message}}</p>
+										<img
+											src="/images/{{image}}"
+											alt="{{name}}">
+
+										<h2>{{name}}</h2>
+
+										<p>
+											<strong>Resort:</strong>
+											{{resort}}
+										</p>
+
+										<p>
+											<strong>Duration:</strong>
+											{{length}}
+										</p>
+
+										<p>
+											<strong>Price:</strong>
+											${{perPerson}} per person
+										</p>
+
+										<p>{{description}}</p>
 									</li>
-								{{else}}
-									{{#each trips}}
-										<li>
-											<img
-												src="/images/{{this.image}}"
-												alt="{{this.name}}">
-
-											<h2>{{this.name}}</h2>
-
-											<p>
-												<strong>Resort:</strong>
-												{{this.resort}}
-											</p>
-
-											<p>
-												<strong>Duration:</strong>
-												{{this.length}}
-											</p>
-
-											<p>
-												<strong>Price:</strong>
-												${{this.perPerson}} per person
-											</p>
-
-											<p>{{this.description}}</p>
-										</li>
-									{{/each}}
-								{{/if}}
+								{{/each}}
 							</ul>
+
+							{{#if showPagination}}
+								<div class="pagination">
+									{{#if previousPage}}
+										<a
+											href="/travel?page={{previousPage}}&search={{search}}&sort={{sort}}&minPrice={{minPrice}}&maxPrice={{maxPrice}}&duration={{duration}}">
+											&laquo; Previous
+										</a>
+									{{/if}}
+
+									<span>
+										Page {{pagination.page}} of
+										{{pagination.totalPages}}
+									</span>
+
+									{{#if nextPage}}
+										<a
+											href="/travel?page={{nextPage}}&search={{search}}&sort={{sort}}&minPrice={{minPrice}}&maxPrice={{maxPrice}}&duration={{duration}}">
+											Next &raquo;
+										</a>
+									{{/if}}
+								</div>
+							{{/if}}
 						</div>
 					</div>
 				</div>
