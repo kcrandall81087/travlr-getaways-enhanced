@@ -79,6 +79,23 @@
   line-height: 1.55;
 }
 
+.trip-rating {
+  margin-bottom: 0.75rem;
+}
+
+.trip-stars {
+  color: #f4b400;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.rating-value {
+  margin-left: 0.4rem;
+  color: #212529;
+  letter-spacing: normal;
+}
+
 .card-footer {
   padding: 1rem 1.25rem;
   border-top: 1px solid #eef0f3;

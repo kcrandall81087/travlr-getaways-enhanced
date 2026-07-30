@@ -12,6 +12,11 @@ import { Router } from '@angular/router';
 import { TripDataService } from '../services/trip-data.service';
 import { StatusMessageComponent } from '../status-message/status-message.component';
 
+import {
+  Trip,
+  TripCategory
+} from '../models/trip';
+
 @Component({
   selector: 'app-edit-trip',
   standalone: true,
@@ -30,6 +35,10 @@ export class EditTripComponent implements OnInit {
   isSaving = false;
   successMessage = '';
   errorMessage = '';
+  categories: TripCategory[] = [];
+  isLoadingCategories = false;
+  averageRating = 0;
+  reviewCount = 0;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -38,6 +47,8 @@ export class EditTripComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadCategories();
+    
     this.editForm = this.formBuilder.group({
       _id: [],
       code: ['', Validators.required],
@@ -45,6 +56,7 @@ export class EditTripComponent implements OnInit {
       length: ['', Validators.required],
       start: ['', Validators.required],
       resort: ['', Validators.required],
+      category: ['', Validators.required],
       perPerson: ['', Validators.required],
       image: ['', Validators.required],
       description: ['', Validators.required]
@@ -59,11 +71,15 @@ export class EditTripComponent implements OnInit {
     }
 
     this.tripService.getTrip(tripCode).subscribe({
-      next: (data) => {
+      next: (data: Trip) => {
         this.editForm.patchValue({
           ...data,
-          start: this.formatDateForInput(data.start)
+          start: this.formatDateForInput(data.start),
+          category: data.category?._id ?? ''
         });
+
+        this.averageRating = data.averageRating ?? 0;
+        this.reviewCount = data.reviewCount ?? 0;
 
         this.isLoading = false;
       },
@@ -79,6 +95,22 @@ export class EditTripComponent implements OnInit {
 
   get f() {
     return this.editForm.controls;
+  }
+
+  private loadCategories(): void {
+    this.isLoadingCategories = true;
+
+    this.tripService.getCategories().subscribe({
+      next: (categories: TripCategory[]) => {
+        this.categories = categories;
+        this.isLoadingCategories = false;
+      },
+      error: () => {
+        this.isLoadingCategories = false;
+        this.errorMessage =
+          'Trip categories could not be loaded.';
+      }
+    });
   }
 
   public onSubmit(): void {

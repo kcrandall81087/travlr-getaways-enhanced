@@ -117,10 +117,51 @@
     </div>
 
     <div class="form-group">
+      <label for="category">Category:</label>
+
+      <select
+        id="category"
+        formControlName="category"
+        class="form-control"
+        [disabled]="isLoadingCategories"
+        [ngClass]="{
+          'is-invalid':
+            (submitted || f['category'].touched) &&
+            f['category'].errors
+        }">
+
+        <option value="">
+          {{
+            isLoadingCategories
+              ? 'Loading categories...'
+              : 'Select a category'
+          }}
+        </option>
+
+        <option
+          *ngFor="let category of categories"
+          [value]="category._id">
+          {{ category.name }}
+        </option>
+      </select>
+
+      <div
+        class="invalid-feedback"
+        *ngIf="
+          (submitted || f['category'].touched) &&
+          f['category'].errors?.['required']
+        ">
+        Category is required.
+      </div>
+    </div>
+
+    <div class="form-group">
       <label for="perPerson">Per Person:</label>
       <input
         id="perPerson"
-        type="text"
+        type="number"
+        min="0"
+        step="1"
         formControlName="perPerson"
         placeholder="Price per person"
         class="form-control"

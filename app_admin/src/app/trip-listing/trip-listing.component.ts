@@ -8,7 +8,8 @@ import { Trip } from '../models/trip';
 import {
   PaginationMetadata,
   TripDataService,
-  TripListResponse
+  TripListResponse,
+  TripStatistics
 } from '../services/trip-data.service';
 import { AuthenticationService } from '../services/authentication.service';
 
@@ -30,6 +31,10 @@ export class TripListingComponent implements OnInit {
 
   searchTerm = '';
   selectedSort = 'name';
+
+  statistics: TripStatistics | null = null;
+  isStatsLoading = false;
+  statsMessage = '';
 
   minPrice: number | null = null;
   maxPrice: number | null = null;
@@ -142,7 +147,33 @@ export class TripListingComponent implements OnInit {
     });
   }
 
+  private loadTripStatistics(): void {
+    this.isStatsLoading = true;
+    this.statsMessage = '';
+
+    this.tripDataService.getTripStats().subscribe({
+      next: (statistics: TripStatistics) => {
+        this.statistics = statistics;
+        this.isStatsLoading = false;
+      },
+      error: (error: any) => {
+        console.error(
+          'Unable to retrieve trip statistics:',
+          error
+        );
+
+        this.statistics = null;
+        this.statsMessage =
+          error?.error?.message ||
+          'Trip statistics are currently unavailable.';
+
+        this.isStatsLoading = false;
+      }
+    });
+  }
+
   ngOnInit(): void {
+    this.loadTripStatistics();
     this.loadTrips();
   }
 }

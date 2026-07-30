@@ -84,61 +84,42 @@ const tripsList = asyncHandler(async (req, res) => {
   }
 
   /*
-   * Convert the existing string-based perPerson field to a number
-   * before applying price comparisons.
+   * Apply price filters directly to the normalized numeric field.
    */
   if (
     minimumPrice !== undefined ||
     maximumPrice !== undefined
   ) {
-    const numericPriceExpression = {
-      $convert: {
-        input: '$perPerson',
-        to: 'double',
-        onError: null,
-        onNull: null
-      }
-    };
-
-    const priceConditions = [];
+    query.perPerson = {};
 
     if (minimumPrice !== undefined) {
-      priceConditions.push({
-        $gte: [
-          numericPriceExpression,
-          minimumPrice
-        ]
-      });
+      query.perPerson.$gte = minimumPrice;
     }
 
     if (maximumPrice !== undefined) {
-      priceConditions.push({
-        $lte: [
-          numericPriceExpression,
-          maximumPrice
-        ]
-      });
+      query.perPerson.$lte = maximumPrice;
     }
-
-    query.$expr = {
-      $and: priceConditions
-    };
   }
 
   /*
-   * Filter by the existing string-based duration field.
-   *
-   * Examples:
-   * duration=4
-   * duration=4 nights
+   * Filter by the normalized numeric trip duration.
    */
-  if (duration && duration.trim()) {
-    const safeDuration = escapeRegex(duration.trim());
+  let durationNumber;
 
-    query.length = {
-      $regex: safeDuration,
-      $options: 'i'
-    };
+  if (duration !== undefined && duration !== '') {
+    durationNumber = Number(duration);
+
+    if (
+      !Number.isInteger(durationNumber) ||
+      durationNumber <= 0
+    ) {
+      throw new AppError(
+        'Duration must be a positive whole number.',
+        400
+      );
+    }
+
+    query.durationNights = durationNumber;
   }
 
   /*
@@ -157,107 +138,53 @@ const tripsList = asyncHandler(async (req, res) => {
   const skip = (pageNumber - 1) * limitNumber;
 
   /*
-   * Only approved fields may be used for sorting.
-   */
-  const allowedSortFields = [
-    'name',
-    'resort',
-    'length',
-    'perPerson'
-  ];
+  * Map supported API sort values to database fields.
+  *
+  * The existing interfaces still submit "length", so it is mapped
+  * to the normalized durationNights field for backward compatibility.
+  */
+  const allowedSortFields = {
+    name: 'name',
+    resort: 'resort',
+    length: 'durationNights',
+    durationNights: 'durationNights',
+    perPerson: 'perPerson',
+    start: 'start'
+  };
 
   let requestedSortField = 'name';
   let sortDirection = 1;
 
   if (sort) {
-    const field = sort.startsWith('-')
+    const descending = sort.startsWith('-');
+    const requestedField = descending
       ? sort.substring(1)
       : sort;
 
-    if (allowedSortFields.includes(field)) {
-      requestedSortField = field;
-      sortDirection = sort.startsWith('-') ? -1 : 1;
+    if (allowedSortFields[requestedField]) {
+      requestedSortField =
+        allowedSortFields[requestedField];
+
+      sortDirection = descending ? -1 : 1;
     }
   }
 
-  /*
-   * Map string-based fields to temporary numeric fields so that
-   * price and duration are sorted numerically.
-   */
-  const aggregationSortFields = {
-    name: 'name',
-    resort: 'resort',
-    length: 'numericDuration',
-    perPerson: 'numericPrice'
+  const sortOptions = {
+    [requestedSortField]: sortDirection,
+    _id: 1
   };
 
-  const aggregationSortField =
-    aggregationSortFields[requestedSortField];
-
-  const pipeline = [
-    {
-      $match: query
-    },
-    {
-      $addFields: {
-        /*
-         * Convert values such as "799.00" to 799.
-         */
-        numericPrice: {
-          $convert: {
-            input: '$perPerson',
-            to: 'double',
-            onError: null,
-            onNull: null
-          }
-        },
-
-        /*
-         * Extract the first number from values such as
-         * "4 nights / 5 days" and convert it to 4.
-         */
-        numericDuration: {
-          $convert: {
-            input: {
-              $arrayElemAt: [
-                {
-                  $split: [
-                    '$length',
-                    ' '
-                  ]
-                },
-                0
-              ]
-            },
-            to: 'int',
-            onError: null,
-            onNull: null
-          }
-        }
-      }
-    },
-    {
-      $sort: {
-        [aggregationSortField]: sortDirection,
-        _id: 1
-      }
-    },
-    {
-      $skip: skip
-    },
-    {
-      $limit: limitNumber
-    },
-    {
-      $project: {
-        numericPrice: 0,
-        numericDuration: 0
-      }
-    }
-  ];
-
+  /*
+   * Query MongoDB directly using the normalized numeric fields.
+   */
   const [trips, total] = await Promise.all([
-    Trip.aggregate(pipeline),
+    Trip.find(query)
+      .populate('category', 'name description')
+      .sort(sortOptions)
+      .skip(skip)
+      .limit(limitNumber)
+      .lean(),
+
     Trip.countDocuments(query)
   ]);
 
@@ -269,7 +196,7 @@ const tripsList = asyncHandler(async (req, res) => {
       search: search?.trim() || null,
       minPrice: minimumPrice ?? null,
       maxPrice: maximumPrice ?? null,
-      duration: duration?.trim() || null,
+      duration: durationNumber ?? null,
       sort: sort || null
     },
     pagination: {
@@ -286,7 +213,7 @@ const tripsList = asyncHandler(async (req, res) => {
 const tripsFindCode = asyncHandler(async (req, res) => {
   const trip = await Trip.findOne({
     code: req.params.tripCode
-  });
+  }).populate('category', 'name description');
 
   if (!trip) {
     throw new AppError(
@@ -301,6 +228,8 @@ const tripsFindCode = asyncHandler(async (req, res) => {
 const tripsAddTrip = asyncHandler(async (req, res) => {
   const trip = await Trip.create(req.validatedTrip);
 
+  await trip.populate('category', 'name description');
+
   return res.status(201).json(trip);
 });
 
@@ -311,7 +240,7 @@ const tripsUpdateTrip = asyncHandler(async (req, res) => {
     },
     req.validatedTrip,
     {
-      new: true,
+      returnDocument: 'after',
       runValidators: true
     }
   );
@@ -323,11 +252,399 @@ const tripsUpdateTrip = asyncHandler(async (req, res) => {
     );
   }
 
+  await trip.populate('category', 'name description');
+
   return res.status(200).json(trip);
+});
+
+const tripsStats = asyncHandler(async (req, res) => {
+  const [results] = await Trip.aggregate([
+    {
+      $facet: {
+        /*
+         * Overall statistics currently displayed by the dashboard.
+         */
+        overall: [
+          {
+            $group: {
+              _id: null,
+
+              tripCount: {
+                $sum: 1
+              },
+
+              averagePrice: {
+                $avg: '$perPerson'
+              },
+
+              lowestPrice: {
+                $min: '$perPerson'
+              },
+
+              highestPrice: {
+                $max: '$perPerson'
+              },
+
+              averageDuration: {
+                $avg: '$durationNights'
+              },
+
+              shortestDuration: {
+                $min: '$durationNights'
+              },
+
+              longestDuration: {
+                $max: '$durationNights'
+              },
+
+              totalReviews: {
+                $sum: {
+                  $ifNull: ['$reviewCount', 0]
+                }
+              },
+
+              reviewedTripCount: {
+                $sum: {
+                  $cond: [
+                    {
+                      $gt: [
+                        {
+                          $ifNull: ['$reviewCount', 0]
+                        },
+                        0
+                      ]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+
+              weightedRatingTotal: {
+                $sum: {
+                  $multiply: [
+                    {
+                      $ifNull: ['$averageRating', 0]
+                    },
+                    {
+                      $ifNull: ['$reviewCount', 0]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+
+              tripCount: 1,
+
+              averagePrice: {
+                $round: ['$averagePrice', 2]
+              },
+
+              lowestPrice: 1,
+              highestPrice: 1,
+
+              averageDuration: {
+                $round: ['$averageDuration', 2]
+              },
+
+              shortestDuration: 1,
+              longestDuration: 1,
+
+              totalReviews: 1,
+              reviewedTripCount: 1,
+
+              averageRating: {
+                $cond: [
+                  {
+                    $gt: ['$totalReviews', 0]
+                  },
+                  {
+                    $round: [
+                      {
+                        $divide: [
+                          '$weightedRatingTotal',
+                          '$totalReviews'
+                        ]
+                      },
+                      1
+                    ]
+                  },
+                  0
+                ]
+              }
+            }
+          }
+        ],
+
+        /*
+         * Return the three highest-rated trips that have
+         * received at least one customer review.
+         */
+        highestRatedTrips: [
+          {
+            $match: {
+              reviewCount: {
+                $gt: 0
+              }
+            }
+          },
+          {
+            $sort: {
+              averageRating: -1,
+              reviewCount: -1,
+              name: 1
+            }
+          },
+          {
+            $limit: 3
+          },
+          {
+            $project: {
+              _id: 0,
+              code: 1,
+              name: 1,
+              resort: 1,
+
+              averageRating: {
+                $round: [
+                  {
+                    $ifNull: ['$averageRating', 0]
+                  },
+                  1
+                ]
+              },
+
+              reviewCount: {
+                $ifNull: ['$reviewCount', 0]
+              }
+            }
+          }
+        ],
+
+        /*
+         * Return the three trips with the greatest number
+         * of submitted customer reviews.
+         */
+        mostReviewedTrips: [
+          {
+            $match: {
+              reviewCount: {
+                $gt: 0
+              }
+            }
+          },
+          {
+            $sort: {
+              reviewCount: -1,
+              averageRating: -1,
+              name: 1
+            }
+          },
+          {
+            $limit: 3
+          },
+          {
+            $project: {
+              _id: 0,
+              code: 1,
+              name: 1,
+              resort: 1,
+
+              averageRating: {
+                $round: [
+                  {
+                    $ifNull: ['$averageRating', 0]
+                  },
+                  1
+                ]
+              },
+
+              reviewCount: {
+                $ifNull: ['$reviewCount', 0]
+              }
+            }
+          }
+        ],
+
+        /*
+         * Join trips to their category records and calculate
+         * statistics for each category.
+         */
+        categoryStatistics: [
+          {
+            $lookup: {
+              from: 'categories',
+              localField: 'category',
+              foreignField: '_id',
+              as: 'categoryDetails'
+            }
+          },
+          {
+            $unwind: {
+              path: '$categoryDetails',
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $group: {
+              _id: '$category',
+
+              categoryName: {
+                $first: {
+                  $ifNull: [
+                    '$categoryDetails.name',
+                    'Uncategorized'
+                  ]
+                }
+              },
+
+              tripCount: {
+                $sum: 1
+              },
+
+              averagePrice: {
+                $avg: '$perPerson'
+              },
+
+              lowestPrice: {
+                $min: '$perPerson'
+              },
+
+              highestPrice: {
+                $max: '$perPerson'
+              },
+
+              averageDuration: {
+                $avg: '$durationNights'
+              },
+
+              totalReviews: {
+                $sum: {
+                  $ifNull: ['$reviewCount', 0]
+                }
+              },
+
+              reviewedTripCount: {
+                $sum: {
+                  $cond: [
+                    {
+                      $gt: [
+                        {
+                          $ifNull: ['$reviewCount', 0]
+                        },
+                        0
+                      ]
+                    },
+                    1,
+                    0
+                  ]
+                }
+              },
+
+              weightedRatingTotal: {
+                $sum: {
+                  $multiply: [
+                    {
+                      $ifNull: ['$averageRating', 0]
+                    },
+                    {
+                      $ifNull: ['$reviewCount', 0]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          {
+            $project: {
+              _id: 0,
+
+              categoryId: {
+                $toString: '$_id'
+              },
+
+              categoryName: 1,
+              tripCount: 1,
+
+              averagePrice: {
+                $round: ['$averagePrice', 2]
+              },
+
+              lowestPrice: 1,
+              highestPrice: 1,
+
+              averageDuration: {
+                $round: ['$averageDuration', 2]
+              },
+
+              totalReviews: 1,
+              reviewedTripCount: 1,
+
+              averageRating: {
+                $cond: [
+                  {
+                    $gt: ['$totalReviews', 0]
+                  },
+                  {
+                    $round: [
+                      {
+                        $divide: [
+                          '$weightedRatingTotal',
+                          '$totalReviews'
+                        ]
+                      },
+                      1
+                    ]
+                  },
+                  0
+                ]
+              }
+            }
+          },
+          {
+            $sort: {
+              categoryName: 1
+            }
+          }
+        ]
+      }
+    }
+  ]);
+
+  const defaultOverallStatistics = {
+    tripCount: 0,
+    averagePrice: 0,
+    lowestPrice: 0,
+    highestPrice: 0,
+    averageDuration: 0,
+    shortestDuration: 0,
+    longestDuration: 0,
+    totalReviews: 0,
+    reviewedTripCount: 0,
+    averageRating: 0
+  };
+
+  const overallStatistics =
+    results?.overall?.[0] || defaultOverallStatistics;
+
+  return res.status(200).json({
+    ...overallStatistics,
+    highestRatedTrips:
+      results?.highestRatedTrips || [],
+    mostReviewedTrips:
+      results?.mostReviewedTrips || [],
+    categoryStatistics:
+      results?.categoryStatistics || []
+  });
 });
 
 module.exports = {
   tripsList,
+  tripsStats,
   tripsFindCode,
   tripsAddTrip,
   tripsUpdateTrip

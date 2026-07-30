@@ -24,3 +24,5 @@ mongoose.connection.on('disconnected', () => {
 });
 
 require('./travlr');
+require('./category');
+require('./review');

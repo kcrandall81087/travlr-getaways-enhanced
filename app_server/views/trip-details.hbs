@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>{{title}} - Travlr Getaways</title>
+	<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+	<div id="background">
+		<div id="page">
+			{{> header }}
+
+			<div id="contents">
+				<div class="box">
+					<div>
+						<div class="body">
+
+							{{#if trip}}
+
+								<h1>{{trip.name}}</h1>
+
+                                <a
+                                    href="/travel"
+                                    class="trip-back-link">
+                                    <span aria-hidden="true">&larr;</span>
+                                    Back to Travel Packages
+                                </a>
+
+								<div class="trip-detail-layout">
+
+									<div class="trip-detail-image">
+										<img
+											src="/images/{{trip.image}}"
+											alt="{{trip.name}}">
+									</div>
+
+									<div class="trip-detail-information">
+										<h2>{{trip.resort}}</h2>
+
+										<div class="trip-detail-meta">
+                                            {{#if trip.category}}
+                                                <span>
+                                                    <strong>Category:</strong>
+                                                    {{trip.category.name}}
+                                                </span>
+                                            {{/if}}
+
+                                            <span>
+                                                <strong>Duration:</strong>
+                                                {{trip.length}}
+                                            </span>
+
+                                            <span>
+                                                <strong>Price:</strong>
+                                                ${{trip.perPerson}} per person
+                                            </span>
+                                        </div>
+
+                                        <div class="trip-detail-rating">
+                                            <span
+                                                class="customer-rating-stars"
+                                                aria-hidden="true">
+                                                {{trip.ratingStars}}
+                                            </span>
+
+                                            {{#if trip.hasReviews}}
+                                                <strong>
+                                                    {{trip.formattedAverageRating}} / 5
+                                                </strong>
+
+                                                <a
+                                                    href="#customer-reviews"
+                                                    class="trip-review-link">
+                                                    ({{trip.reviewCount}} {{#if (eq trip.reviewCount 1)}}review{{else}}reviews{{/if}})
+                                                </a>
+                                            {{else}}
+                                                <strong>No reviews yet</strong>
+                                            {{/if}}
+                                        </div>
+									</div>
+								</div>
+
+								<div class="trip-detail-description">
+									<h2>About This Trip</h2>
+									<p>{{trip.description}}</p>
+								</div>
+
+								<section
+                                    id="customer-reviews"
+                                    class="customer-reviews-section">
+									<h2>Customer Reviews</h2>
+
+									{{#if reviews.length}}
+										<div class="customer-review-list">
+											{{#each reviews}}
+												<article class="customer-review">
+													<div class="customer-review-heading">
+														<div>
+															<h3>{{reviewerName}}</h3>
+
+															<span
+																class="customer-rating-stars"
+																aria-label="{{rating}} out of 5 stars">
+																{{ratingStars}}
+															</span>
+														</div>
+
+														<time datetime="{{createdAt}}">
+															{{formattedDate}}
+														</time>
+													</div>
+
+													<p>{{comment}}</p>
+												</article>
+											{{/each}}
+										</div>
+									{{else}}
+										<p>
+											No reviews have been submitted for this trip yet.
+											Be the first to share your experience.
+										</p>
+									{{/if}}
+
+                                    <div class="customer-review-form-section">
+                                        <h2>Leave a Review</h2>
+
+                                        <form
+                                            id="customer-review-form"
+                                            class="customer-review-form"
+                                            data-trip-code="{{trip.code}}">
+
+                                            <div class="review-form-field">
+                                                <label for="reviewer-name">
+                                                    Name
+                                                </label>
+
+                                                <input
+                                                    id="reviewer-name"
+                                                    name="reviewerName"
+                                                    type="text"
+                                                    maxlength="100"
+                                                    required>
+                                            </div>
+
+                                            <div class="review-form-field">
+                                                <label for="review-rating">
+                                                    Rating
+                                                </label>
+
+                                                <select
+                                                    id="review-rating"
+                                                    name="rating"
+                                                    required>
+                                                    <option value="" disabled selected>
+                                                        Select a rating
+                                                    </option>
+                                                    <option value="5">5 - Excellent</option>
+                                                    <option value="4">4 - Very Good</option>
+                                                    <option value="3">3 - Good</option>
+                                                    <option value="2">2 - Fair</option>
+                                                    <option value="1">1 - Poor</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="review-form-field">
+                                                <label for="review-comment">
+                                                    Comment
+                                                </label>
+
+                                                <textarea
+                                                    id="review-comment"
+                                                    name="comment"
+                                                    rows="6"
+                                                    maxlength="2000"
+                                                    required></textarea>
+                                            </div>
+
+                                            <p
+                                                id="review-form-message"
+                                                class="review-form-message"
+                                                aria-live="polite">
+                                            </p>
+
+                                            <button
+                                                type="submit"
+                                                class="review-submit-button">
+                                                Submit Review
+                                            </button>
+                                        </form>
+                                    </div>
+								</section>
+
+							{{else}}
+
+								<h1>Trip Details</h1>
+
+								<p>
+									{{#if message}}
+										{{message}}
+									{{else}}
+										The requested trip could not be found.
+									{{/if}}
+								</p>
+
+								<p>
+									<a href="/travel">
+										Return to Travel Packages
+									</a>
+								</p>
+
+							{{/if}}
+
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		{{> footer }}
+	</div>
+
+    <script src="/js/reviews.js"></script>
+</body>
+</html>

@@ -45,7 +45,23 @@ const travel = async (req, res) => {
     }
 
     const trips = Array.isArray(data.trips)
-      ? data.trips
+      ? data.trips.map((trip) => {
+          const rating = Math.min(
+            Math.max(trip.averageRating ?? 0, 0),
+            5
+          );
+
+          const roundedRating = Math.round(rating);
+          const fullStars = '★'.repeat(roundedRating);
+          const emptyStars = '☆'.repeat(5 - roundedRating);
+
+          return {
+            ...trip,
+            ratingStars: `${fullStars}${emptyStars}`,
+            hasReviews: (trip.reviewCount ?? 0) > 0,
+            formattedAverageRating: rating.toFixed(1)
+          };
+        })
       : [];
 
     const pagination = data.pagination ?? {
@@ -129,6 +145,103 @@ const travel = async (req, res) => {
   }
 };
 
+/* GET individual trip details page */
+const tripDetails = async (req, res) => {
+  const { tripCode } = req.params;
+
+  const tripUrl =
+    `http://localhost:3000/api/trips/` +
+    `${encodeURIComponent(tripCode)}`;
+
+  const reviewsUrl =
+    `http://localhost:3000/api/trips/` +
+    `${encodeURIComponent(tripCode)}/reviews`;
+
+  try {
+    const [tripResponse, reviewsResponse] =
+      await Promise.all([
+        fetch(tripUrl),
+        fetch(reviewsUrl)
+      ]);
+
+    const trip = await tripResponse.json();
+    const reviewsData = await reviewsResponse.json();
+
+    if (!tripResponse.ok) {
+      throw new Error(
+        trip.message ||
+        `Trip API request failed with status ${tripResponse.status}`
+      );
+    }
+
+    if (!reviewsResponse.ok) {
+      throw new Error(
+        reviewsData.message ||
+        `Reviews API request failed with status ${reviewsResponse.status}`
+      );
+    }
+
+    const reviews = Array.isArray(reviewsData)
+      ? reviewsData.map((review) => {
+          const rating = Math.min(
+            Math.max(review.rating ?? 0, 0),
+            5
+          );
+
+          return {
+            ...review,
+            ratingStars:
+              '★'.repeat(rating) +
+              '☆'.repeat(5 - rating),
+            formattedDate: new Date(
+              review.createdAt
+            ).toLocaleDateString('en-US', {
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric'
+            })
+          };
+        })
+      : [];
+
+    const averageRating = Math.min(
+      Math.max(trip.averageRating ?? 0, 0),
+      5
+    );
+
+    const roundedRating = Math.round(averageRating);
+
+    res.render('trip-details', {
+      title: `${trip.name} - Trip Details`,
+      trip: {
+        ...trip,
+        ratingStars:
+          '★'.repeat(roundedRating) +
+          '☆'.repeat(5 - roundedRating),
+        formattedAverageRating:
+          averageRating.toFixed(1),
+        hasReviews: (trip.reviewCount ?? 0) > 0
+      },
+      reviews
+    });
+  } catch (err) {
+    console.error(
+      `Unable to load trip ${tripCode}:`,
+      err
+    );
+
+    res.status(500).render('trip-details', {
+      title: 'Trip Details',
+      trip: null,
+      reviews: [],
+      message:
+        err.message ||
+        'Trip details are temporarily unavailable.'
+    });
+  }
+};
+
 module.exports = {
-  travel
+  travel,
+  tripDetails
 };

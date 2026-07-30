@@ -2,6 +2,7 @@
   <div class="trip-listing-header">
     <div>
       <h1>Travel Packages</h1>
+
       <p class="trip-listing-subtitle">
         Review and manage the available destinations.
       </p>
@@ -16,9 +17,391 @@
     </button>
   </div>
 
+  <section
+    class="trip-statistics"
+    aria-labelledby="trip-statistics-heading">
+
+    <div class="trip-statistics-header">
+      <div>
+        <h2 id="trip-statistics-heading">
+          Database Statistics
+        </h2>
+
+        <p>
+          Summary information calculated from all stored trips and reviews.
+        </p>
+      </div>
+    </div>
+
+    <div
+      *ngIf="isStatsLoading"
+      class="statistics-loading"
+      aria-live="polite">
+      Loading database statistics...
+    </div>
+
+    <p
+      *ngIf="statsMessage && !isStatsLoading"
+      class="statistics-message"
+      aria-live="polite">
+      {{ statsMessage }}
+    </p>
+
+    <ng-container *ngIf="statistics && !isStatsLoading">
+      <div class="statistics-grid">
+        <article class="statistics-card">
+          <span class="statistics-label">
+            Total Trips
+          </span>
+
+          <strong class="statistics-value">
+            {{ statistics.tripCount }}
+          </strong>
+        </article>
+
+        <article class="statistics-card">
+          <span class="statistics-label">
+            Average Price
+          </span>
+
+          <strong class="statistics-value">
+            {{ statistics.averagePrice | currency:'USD':'symbol':'1.0-2' }}
+          </strong>
+        </article>
+
+        <article class="statistics-card">
+          <span class="statistics-label">
+            Price Range
+          </span>
+
+          <strong class="statistics-value statistics-value-small">
+            {{ statistics.lowestPrice | currency:'USD':'symbol':'1.0-0' }}
+            –
+            {{ statistics.highestPrice | currency:'USD':'symbol':'1.0-0' }}
+          </strong>
+        </article>
+
+        <article class="statistics-card">
+          <span class="statistics-label">
+            Average Duration
+          </span>
+
+          <strong class="statistics-value">
+            {{ statistics.averageDuration | number:'1.0-1' }}
+            nights
+          </strong>
+        </article>
+
+        <article class="statistics-card">
+          <span class="statistics-label">
+            Duration Range
+          </span>
+
+          <strong class="statistics-value statistics-value-small">
+            {{ statistics.shortestDuration }}
+            –
+            {{ statistics.longestDuration }}
+            nights
+          </strong>
+        </article>
+
+        <article class="statistics-card">
+          <span class="statistics-label">
+            Total Reviews
+          </span>
+
+          <strong class="statistics-value">
+            {{ statistics.totalReviews }}
+          </strong>
+        </article>
+
+        <article class="statistics-card">
+          <span class="statistics-label">
+            Reviewed Trips
+          </span>
+
+          <strong class="statistics-value statistics-value-small">
+            {{ statistics.reviewedTripCount }}
+            of
+            {{ statistics.tripCount }}
+          </strong>
+        </article>
+
+        <article class="statistics-card">
+          <span class="statistics-label">
+            Average Rating
+          </span>
+
+          <strong class="statistics-value statistics-value-small">
+            <ng-container
+              *ngIf="statistics.totalReviews > 0; else noRatings">
+
+              <span aria-hidden="true">
+                ★
+              </span>
+
+              {{ statistics.averageRating | number:'1.1-1' }}
+              / 5
+            </ng-container>
+
+            <ng-template #noRatings>
+              No ratings
+            </ng-template>
+          </strong>
+        </article>
+      </div>
+
+      <div class="statistics-details">
+        <section
+          class="statistics-panel"
+          aria-labelledby="highest-rated-heading">
+
+          <div class="statistics-panel-header">
+            <div>
+              <h3 id="highest-rated-heading">
+                Highest-Rated Trips
+              </h3>
+
+              <p>
+                Destinations ranked by average customer rating.
+              </p>
+            </div>
+          </div>
+
+          <div
+            *ngIf="
+              statistics.highestRatedTrips.length > 0;
+              else noHighestRated
+            "
+            class="statistics-list">
+
+            <article
+              *ngFor="
+                let trip of statistics.highestRatedTrips;
+                let position = index
+              "
+              class="statistics-list-item">
+
+              <span class="statistics-rank">
+                {{ position + 1 }}
+              </span>
+
+              <div class="statistics-list-content">
+                <strong>
+                  {{ trip.name }}
+                </strong>
+
+                <span>
+                  {{ trip.resort }}
+                </span>
+              </div>
+
+              <div class="statistics-list-value">
+                <strong>
+                  <span aria-hidden="true">★</span>
+                  {{ trip.averageRating | number:'1.1-1' }}
+                </strong>
+
+                <span>
+                  {{ trip.reviewCount }}
+                  {{ trip.reviewCount === 1 ? 'review' : 'reviews' }}
+                </span>
+              </div>
+            </article>
+          </div>
+
+          <ng-template #noHighestRated>
+            <p class="statistics-empty-message">
+              No reviewed trips are available.
+            </p>
+          </ng-template>
+        </section>
+
+        <section
+          class="statistics-panel"
+          aria-labelledby="most-reviewed-heading">
+
+          <div class="statistics-panel-header">
+            <div>
+              <h3 id="most-reviewed-heading">
+                Most-Reviewed Trips
+              </h3>
+
+              <p>
+                Destinations ranked by total customer reviews.
+              </p>
+            </div>
+          </div>
+
+          <div
+            *ngIf="
+              statistics.mostReviewedTrips.length > 0;
+              else noMostReviewed
+            "
+            class="statistics-list">
+
+            <article
+              *ngFor="
+                let trip of statistics.mostReviewedTrips;
+                let position = index
+              "
+              class="statistics-list-item">
+
+              <span class="statistics-rank">
+                {{ position + 1 }}
+              </span>
+
+              <div class="statistics-list-content">
+                <strong>
+                  {{ trip.name }}
+                </strong>
+
+                <span>
+                  {{ trip.resort }}
+                </span>
+              </div>
+
+              <div class="statistics-list-value">
+                <strong>
+                  {{ trip.reviewCount }}
+                  {{ trip.reviewCount === 1 ? 'review' : 'reviews' }}
+                </strong>
+
+                <span>
+                  <span aria-hidden="true">★</span>
+                  {{ trip.averageRating | number:'1.1-1' }}
+                </span>
+              </div>
+            </article>
+          </div>
+
+          <ng-template #noMostReviewed>
+            <p class="statistics-empty-message">
+              No reviewed trips are available.
+            </p>
+          </ng-template>
+        </section>
+      </div>
+
+      <section
+        class="statistics-panel category-statistics-panel"
+        aria-labelledby="category-statistics-heading">
+
+        <div class="statistics-panel-header">
+          <div>
+            <h3 id="category-statistics-heading">
+              Category Statistics
+            </h3>
+
+            <p>
+              Pricing, duration, and review summaries grouped by category.
+            </p>
+          </div>
+        </div>
+
+        <div
+          *ngIf="
+            statistics.categoryStatistics.length > 0;
+            else noCategoryStats
+          "
+          class="category-statistics-grid">
+
+          <article
+            *ngFor="let category of statistics.categoryStatistics"
+            class="category-statistics-card">
+
+            <h4>
+              {{ category.categoryName }}
+            </h4>
+
+            <dl class="category-statistics-list">
+              <div>
+                <dt>Trips</dt>
+                <dd>
+                  {{ category.tripCount }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Average Price</dt>
+                <dd>
+                  {{ category.averagePrice | currency:'USD':'symbol':'1.0-2' }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Price Range</dt>
+                <dd>
+                  {{ category.lowestPrice | currency:'USD':'symbol':'1.0-0' }}
+                  –
+                  {{ category.highestPrice | currency:'USD':'symbol':'1.0-0' }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Average Duration</dt>
+                <dd>
+                  {{ category.averageDuration | number:'1.0-2' }}
+                  nights
+                </dd>
+              </div>
+
+              <div>
+                <dt>Reviewed Trips</dt>
+                <dd>
+                  {{ category.reviewedTripCount }}
+                  of
+                  {{ category.tripCount }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Total Reviews</dt>
+                <dd>
+                  {{ category.totalReviews }}
+                </dd>
+              </div>
+
+              <div>
+                <dt>Average Rating</dt>
+                <dd>
+                  <ng-container
+                    *ngIf="
+                      category.totalReviews > 0;
+                      else noCategoryRating
+                    ">
+
+                    <span aria-hidden="true">
+                      ★
+                    </span>
+
+                    {{ category.averageRating | number:'1.1-1' }}
+                    / 5
+                  </ng-container>
+
+                  <ng-template #noCategoryRating>
+                    No ratings
+                  </ng-template>
+                </dd>
+              </div>
+            </dl>
+          </article>
+        </div>
+
+        <ng-template #noCategoryStats>
+          <p class="statistics-empty-message">
+            No category statistics are available.
+          </p>
+        </ng-template>
+      </section>
+    </ng-container>
+  </section>
+
   <div class="trip-controls">
     <div class="search-control">
-      <label for="trip-search">Search trips</label>
+      <label for="trip-search">
+        Search trips
+      </label>
 
       <input
         id="trip-search"
@@ -30,7 +413,9 @@
     </div>
 
     <div class="filter-control">
-      <label for="minimum-price">Minimum price</label>
+      <label for="minimum-price">
+        Minimum price
+      </label>
 
       <input
         id="minimum-price"
@@ -44,7 +429,9 @@
     </div>
 
     <div class="filter-control">
-      <label for="maximum-price">Maximum price</label>
+      <label for="maximum-price">
+        Maximum price
+      </label>
 
       <input
         id="maximum-price"
@@ -58,7 +445,9 @@
     </div>
 
     <div class="filter-control">
-      <label for="trip-duration">Duration</label>
+      <label for="trip-duration">
+        Duration
+      </label>
 
       <input
         id="trip-duration"
@@ -70,21 +459,47 @@
     </div>
 
     <div class="sort-control">
-      <label for="trip-sort">Sort trips</label>
+      <label for="trip-sort">
+        Sort trips
+      </label>
 
       <select
         id="trip-sort"
         class="form-select"
         [(ngModel)]="selectedSort"
         (change)="sortTrips()">
-        <option value="name">Name: A to Z</option>
-        <option value="-name">Name: Z to A</option>
-        <option value="resort">Resort: A to Z</option>
-        <option value="-resort">Resort: Z to A</option>
-        <option value="length">Duration: Shortest First</option>
-        <option value="-length">Duration: Longest First</option>
-        <option value="perPerson">Price: Low to High</option>
-        <option value="-perPerson">Price: High to Low</option>
+
+        <option value="name">
+          Name: A to Z
+        </option>
+
+        <option value="-name">
+          Name: Z to A
+        </option>
+
+        <option value="resort">
+          Resort: A to Z
+        </option>
+
+        <option value="-resort">
+          Resort: Z to A
+        </option>
+
+        <option value="length">
+          Duration: Shortest First
+        </option>
+
+        <option value="-length">
+          Duration: Longest First
+        </option>
+
+        <option value="perPerson">
+          Price: Low to High
+        </option>
+
+        <option value="-perPerson">
+          Price: High to Low
+        </option>
       </select>
     </div>
 
@@ -123,7 +538,10 @@
     *ngIf="isLoading"
     class="loading-state"
     aria-live="polite">
-    <p>Loading travel packages...</p>
+
+    <p>
+      Loading travel packages...
+    </p>
   </div>
 
   <ng-container *ngIf="!isLoading">
@@ -166,7 +584,9 @@
 
   <ng-template #noTrips>
     <div class="empty-state">
-      <h2>No trips found</h2>
+      <h2>
+        No trips found
+      </h2>
 
       <p
         *ngIf="

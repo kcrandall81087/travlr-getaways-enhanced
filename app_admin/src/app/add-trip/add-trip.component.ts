@@ -12,6 +12,8 @@ import { Router } from '@angular/router';
 import { TripDataService } from '../services/trip-data.service';
 import { StatusMessageComponent } from '../status-message/status-message.component';
 
+import { TripCategory } from '../models/trip';
+
 @Component({
   selector: 'app-add-trip',
   standalone: true,
@@ -29,6 +31,8 @@ export class AddTripComponent implements OnInit {
   isSaving = false;
   successMessage = '';
   errorMessage = '';
+  categories: TripCategory[] = [];
+  isLoadingCategories = false;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -37,6 +41,8 @@ export class AddTripComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadCategories();
+
     this.addForm = this.formBuilder.group({
       _id: [],
       code: ['', Validators.required],
@@ -44,6 +50,7 @@ export class AddTripComponent implements OnInit {
       length: ['', Validators.required],
       start: ['', Validators.required],
       resort: ['', Validators.required],
+      category: ['', Validators.required],
       perPerson: ['', Validators.required],
       image: ['', Validators.required],
       description: ['', Validators.required]
@@ -52,6 +59,22 @@ export class AddTripComponent implements OnInit {
 
   get f() {
     return this.addForm.controls;
+  }
+
+  private loadCategories(): void {
+    this.isLoadingCategories = true;
+
+    this.tripService.getCategories().subscribe({
+      next: (categories: TripCategory[]) => {
+        this.categories = categories;
+        this.isLoadingCategories = false;
+      },
+      error: () => {
+        this.isLoadingCategories = false;
+        this.errorMessage =
+          'Trip categories could not be loaded.';
+      }
+    });
   }
 
   public onSubmit(): void {

@@ -158,11 +158,22 @@
 							<ul id="sites">
 								{{#each trips}}
 									<li>
-										<img
-											src="/images/{{image}}"
-											alt="{{name}}">
+										<a
+											href="/travel/{{code}}"
+											class="trip-card-image-link"
+											aria-label="View details and reviews for {{name}}">
+											<img
+												src="/images/{{image}}"
+												alt="{{name}}">
+										</a>
 
-										<h2>{{name}}</h2>
+										<h2>
+											<a
+												href="/travel/{{code}}"
+												class="trip-card-title-link">
+												{{name}}
+											</a>
+										</h2>
 
 										<p>
 											<strong>Resort:</strong>
@@ -178,6 +189,38 @@
 											<strong>Price:</strong>
 											${{perPerson}} per person
 										</p>
+
+										{{#if category}}
+											<p>
+												<strong>Category:</strong>
+												{{category.name}}
+											</p>
+										{{/if}}
+
+										<div class="customer-trip-rating">
+											{{#if hasReviews}}
+												<p>
+												<span
+													class="customer-rating-stars"
+													aria-hidden="true">
+													{{ratingStars}}
+												</span>
+
+												<strong>
+													{{formattedAverageRating}} / 5
+													({{reviewCount}} {{#if (eq reviewCount 1)}}review{{else}}reviews{{/if}})
+												</strong>
+												</p>
+											{{else}}
+												<p>
+													<span
+														class="customer-rating-stars"
+														aria-hidden="true">
+														☆☆☆☆☆
+													</span>&nbsp;<strong>No reviews yet</strong>
+												</p>
+											{{/if}}
+										</div>
 
 										<p>{{description}}</p>
 									</li>

@@ -139,10 +139,76 @@
     </div>
 
     <div class="form-group">
+      <label for="category">Category:</label>
+
+      <select
+        id="category"
+        formControlName="category"
+        class="form-control"
+        [disabled]="isLoadingCategories"
+        [ngClass]="{
+          'is-invalid':
+            (submitted || f['category'].touched) &&
+            f['category'].errors
+        }">
+
+        <option value="">
+          {{
+            isLoadingCategories
+              ? 'Loading categories...'
+              : 'Select a category'
+          }}
+        </option>
+
+        <option
+          *ngFor="let category of categories"
+          [value]="category._id">
+          {{ category.name }}
+        </option>
+      </select>
+
+      <div
+        class="invalid-feedback"
+        *ngIf="
+          (submitted || f['category'].touched) &&
+          f['category'].errors?.['required']
+        ">
+        Category is required.
+      </div>
+    </div>
+
+    <div class="card my-4">
+      <div class="card-body">
+        <h3 class="h5 card-title">Trip Rating</h3>
+
+        <div *ngIf="reviewCount > 0; else noReviews">
+          <p class="mb-1">
+            <strong>Average rating:</strong>
+            {{ averageRating | number: '1.1-1' }} / 5
+          </p>
+
+          <p class="mb-0">
+            <strong>Review count:</strong>
+            {{ reviewCount }}
+            {{ reviewCount === 1 ? 'review' : 'reviews' }}
+          </p>
+        </div>
+
+        <ng-template #noReviews>
+          <p class="mb-0">
+            This trip has not received any reviews yet.
+          </p>
+        </ng-template>
+      </div>
+    </div>
+
+    <div class="form-group">
       <label for="perPerson">Per Person:</label>
       <input
         id="perPerson"
-        type="text"
+        type="number"
+        min="0"
+        step="1"
         formControlName="perPerson"
         placeholder="Price per person"
         class="form-control"

@@ -4,6 +4,7 @@ const REQUIRED_TRIP_FIELDS = [
   'length',
   'start',
   'resort',
+  'category',
   'perPerson',
   'image',
   'description'
@@ -28,6 +29,24 @@ const normalizeTripPayload = (body = {}) => {
   });
 
   return normalizedPayload;
+};
+
+const parseDurationNights = (length) => {
+  if (typeof length !== 'string') {
+    return null;
+  }
+
+  const match = length.match(/^(\d+)/);
+
+  if (!match) {
+    return null;
+  }
+
+  const duration = Number(match[1]);
+
+  return Number.isInteger(duration) && duration > 0
+    ? duration
+    : null;
 };
 
 const validateTrip = (req, res, next) => {
@@ -61,9 +80,43 @@ const validateTrip = (req, res, next) => {
     });
   }
 
+  const numericPrice = Number(tripData.perPerson);
+
+  if (!Number.isFinite(numericPrice) || numericPrice < 0) {
+    return res.status(400).json({
+      message: 'Trip validation failed.',
+      errors: [
+        {
+          field: 'perPerson',
+          message:
+            'perPerson must contain a nonnegative number.'
+        }
+      ]
+    });
+  }
+
+  const durationNights =
+    parseDurationNights(tripData.length);
+
+  if (durationNights === null) {
+    return res.status(400).json({
+      message: 'Trip validation failed.',
+      errors: [
+        {
+          field: 'length',
+          message:
+            'length must begin with a positive number of nights.'
+        }
+      ]
+    });
+  }
+
   req.validatedTrip = {
     ...tripData,
-    start: startDate
+    code: tripData.code.toUpperCase(),
+    start: startDate,
+    perPerson: numericPrice,
+    durationNights
   };
 
   next();

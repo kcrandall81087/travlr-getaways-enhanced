@@ -17,6 +17,58 @@
       {{ trip.resort }}
     </p>
 
+    <p *ngIf="trip.category" class="trip-category">
+      <strong>Category:</strong>
+      {{ trip.category.name }}
+    </p>
+
+    <div class="trip-rating">
+      <ng-container
+        *ngIf="
+          (trip.reviewCount ?? 0) > 0;
+          else noReviews
+        ">
+
+        <div
+          class="trip-stars"
+          role="img"
+          [attr.aria-label]="
+            (trip.averageRating ?? 0 | number:'1.1-1') +
+            ' out of 5 stars'
+          ">
+
+          <span aria-hidden="true">
+            {{ getStarRating() }}
+          </span>
+
+          <span class="rating-value">
+            {{ trip.averageRating ?? 0 | number:'1.1-1' }}
+          </span>
+        </div>
+
+        <small class="text-muted">
+          {{ trip.reviewCount }}
+          {{ trip.reviewCount === 1 ? 'review' : 'reviews' }}
+        </small>
+      </ng-container>
+
+      <ng-template #noReviews>
+        <div
+          class="trip-stars"
+          role="img"
+          aria-label="No ratings yet">
+
+          <span aria-hidden="true">
+            ☆☆☆☆☆
+          </span>
+        </div>
+
+        <small class="text-muted">
+          No reviews yet
+        </small>
+      </ng-template>
+    </div>
+
     <div class="trip-details">
       <span>{{ trip.length }}</span>
       <span>

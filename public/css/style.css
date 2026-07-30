@@ -543,3 +543,325 @@ hr {
 #connect a.googleplus:hover {
 	background-position: 0 -197px;
 }
+
+.customer-trip-rating {
+  margin: 12px 0;
+}
+
+.customer-trip-rating p {
+  margin: 3px 0;
+}
+
+.customer-rating-stars {
+  color: #f4b400;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+/*--------------------------------------------------------------
+Trip Details Page
+--------------------------------------------------------------*/
+
+.trip-detail-layout {
+	display: flex;
+	align-items: flex-start;
+	gap: 45px;
+	margin-bottom: 35px;
+}
+
+.trip-detail-image img {
+	width: 360px;
+	border: 1px solid #2c9688;
+	display: block;
+}
+
+.trip-detail-information {
+	flex: 1;
+}
+
+#contents .trip-detail-information h2 {
+	margin: -5px 0 24px;
+	line-height: 26px;
+}
+
+.trip-detail-meta {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-bottom: 24px;
+	font-size: 16px;
+}
+
+.trip-detail-rating {
+	margin-bottom: 30px;
+	font-size: 20px;
+	font-weight: bold;
+}
+
+.trip-detail-rating strong {
+	margin-left: 8px;
+}
+
+.trip-detail-description {
+	border-top: 1px solid #cfcfcf;
+	padding-top: 25px;
+	margin-top: 20px;
+}
+
+.trip-detail-description h2 {
+	margin-bottom: 15px;
+}
+
+.customer-reviews-section {
+	margin-top: 40px;
+	border-top: 1px solid #cfcfcf;
+	padding-top: 30px;
+}
+
+.customer-review-list {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.customer-review {
+	background: #faf8f2;
+	border: 1px solid #d7d1c8;
+	padding: 20px;
+}
+
+.customer-review-heading {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 12px;
+}
+
+.customer-review-heading h3 {
+	margin: 0 0 6px;
+	color: #316e66;
+	font-size: 20px;
+}
+
+.customer-review time {
+	color: #777;
+	font-size: 14px;
+	font-style: italic;
+}
+
+@media (max-width: 800px) {
+
+	.trip-detail-layout {
+		flex-direction: column;
+	}
+
+	.trip-detail-image img {
+		width: 100%;
+		max-width: 450px;
+	}
+
+}
+
+html {
+	scroll-behavior: smooth;
+}
+
+.trip-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    margin-top: 6px;
+    margin-bottom: 30px;
+
+	padding: 8px 14px;
+
+	background: #f8f7f2;
+	border: 1px solid #b7b7b7;
+	border-radius: 3px;
+
+	color: #316e66;
+
+	font: bold 13px Arial, Helvetica, sans-serif;
+	text-decoration: none;
+
+	transition: all .2s ease;
+}
+
+.trip-back-link:hover {
+	background: #316e66;
+	color: white;
+	border-color: #316e66;
+}
+
+.trip-review-link {
+	color: #316e66;
+	margin-left: 5px;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+.trip-review-link:hover {
+	color: #2c9688;
+	text-decoration: underline;
+}
+
+#customer-reviews {
+	scroll-margin-top: 20px;
+}
+
+/*--------------------------------------------------------------
+Customer Review Form
+--------------------------------------------------------------*/
+
+.customer-review-form-section {
+	margin-top: 50px;
+	padding-top: 30px;
+	border-top: 1px solid #cfcfcf;
+}
+
+#contents .customer-review-form-section h2 {
+	margin-bottom: 20px;
+}
+
+.customer-review-form {
+	max-width: 800px;
+	background: #faf8f2;
+	border: 1px solid #d7d1c8;
+	padding: 24px;
+}
+
+.review-form-field {
+	margin-bottom: 18px;
+}
+
+.review-form-field label {
+	display: block;
+	color: #316e66;
+	font: bold 14px Arial, Helvetica, sans-serif;
+	margin-bottom: 7px;
+}
+
+.review-form-field input,
+.review-form-field select,
+.review-form-field textarea {
+	box-sizing: border-box;
+	width: 100%;
+	border: 1px solid #b7b7b7;
+	border-radius: 3px;
+	background: #fff;
+	color: #5a4535;
+	font: 15px Arial, Helvetica, sans-serif;
+	padding: 10px;
+}
+
+.review-form-field input,
+.review-form-field select {
+	height: 40px;
+}
+
+.review-form-field textarea {
+	min-height: 250px;
+	line-height: 22px;
+	resize: vertical;
+}
+
+.review-form-field input:focus,
+.review-form-field select:focus,
+.review-form-field textarea:focus {
+	border-color: #2c9688;
+	outline: 2px solid rgba(44, 150, 136, 0.18);
+	outline-offset: 1px;
+}
+
+.review-form-message {
+	min-height: 24px;
+	margin: 0 0 12px;
+	padding: 0;
+	font-weight: bold;
+	line-height: 24px;
+}
+
+.review-form-message.success {
+	color: #316e66;
+	background: #eef6f3;
+	border: 1px solid #b9d7d0;
+	padding: 8px 10px;
+}
+
+.review-form-message.error {
+	color: #a33b2f;
+	background: #fbefed;
+	border: 1px solid #ddb8b2;
+	padding: 8px 10px;
+}
+
+.review-submit-button {
+	cursor: pointer;
+	background: #316e66;
+	border: 1px solid #285c56;
+	border-radius: 3px;
+	color: #fff;
+	font: bold 13px Arial, Helvetica, sans-serif;
+	padding: 12px 22px;
+	text-transform: uppercase;
+}
+
+.review-submit-button:hover {
+	background: #2c9688;
+	border-color: #23796f;
+}
+
+.review-submit-button:disabled {
+	cursor: not-allowed;
+	opacity: 0.65;
+}
+
+@media (max-width: 800px) {
+	.customer-review-form {
+		max-width: none;
+	}
+}
+
+#sites li .trip-card-image-link {
+	float: right;
+	display: block;
+	margin-left: 15px;
+}
+
+#sites li .trip-card-image-link img {
+	float: none;
+	display: block;
+	margin-left: 0;
+}
+
+#contents .trip-card-title-link {
+	color: #316e66;
+	text-decoration: none;
+}
+
+#contents .trip-card-title-link:hover {
+	color: #2c9688;
+	text-decoration: underline;
+}
+
+.trip-card-image-link:hover img {
+	opacity: 0.85;
+}
+
+#sites li .trip-card-image-link {
+	float: right;
+	display: block;
+	width: 360px;
+	margin-left: 15px;
+}
+
+#sites li .trip-card-image-link img {
+	float: none;
+	display: block;
+	width: 360px;
+	height: 250px;
+	margin-left: 0;
+	border: 1px solid #2c9688;
+	object-fit: cover;
+}

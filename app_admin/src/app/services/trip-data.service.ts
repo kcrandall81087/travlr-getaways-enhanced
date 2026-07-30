@@ -8,7 +8,13 @@ import { Observable } from 'rxjs';
 import { User } from '../models/user';
 import { AuthResponse } from '../models/auth-response';
 import { BROWSER_STORAGE } from '../storage';
-import { Trip } from '../models/trip';
+import {
+  Trip,
+  TripCategory,
+  TripReview,
+  ReviewSubmission,
+  ReviewResponse
+} from '../models/trip';
 
 export interface TripQuery {
   search?: string;
@@ -34,46 +40,126 @@ export interface TripListResponse {
   pagination: PaginationMetadata;
 }
 
+export interface RankedTripStatistic {
+  code: string;
+  name: string;
+  resort: string;
+  averageRating: number;
+  reviewCount: number;
+}
+
+export interface CategoryStatistic {
+  categoryId: string;
+  categoryName: string;
+  tripCount: number;
+  averagePrice: number;
+  lowestPrice: number;
+  highestPrice: number;
+  averageDuration: number;
+  totalReviews: number;
+  reviewedTripCount: number;
+  averageRating: number;
+}
+
+export interface TripStatistics {
+  tripCount: number;
+  averagePrice: number;
+  lowestPrice: number;
+  highestPrice: number;
+  averageDuration: number;
+  shortestDuration: number;
+  longestDuration: number;
+  totalReviews: number;
+  reviewedTripCount: number;
+  averageRating: number;
+  highestRatedTrips: RankedTripStatistic[];
+  mostReviewedTrips: RankedTripStatistic[];
+  categoryStatistics: CategoryStatistic[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class TripDataService {
   private readonly baseUrl = 'http://localhost:3000/api';
   private readonly tripsUrl = `${this.baseUrl}/trips`;
+  private readonly categoriesUrl = `${this.baseUrl}/categories`;
 
   constructor(
     private http: HttpClient,
     @Inject(BROWSER_STORAGE) private storage: Storage
   ) {}
 
-  getTrips(query: TripQuery = {}): Observable<TripListResponse> {
+  getTripStats(): Observable<TripStatistics> {
+    return this.http.get<TripStatistics>(
+      `${this.tripsUrl}/stats`
+    );
+  }
+
+  getCategories(): Observable<TripCategory[]> {
+    return this.http.get<TripCategory[]>(
+      this.categoriesUrl
+    );
+  }
+
+  getTrips(
+    query: TripQuery = {}
+  ): Observable<TripListResponse> {
     let params = new HttpParams();
 
     if (query.search?.trim()) {
-      params = params.set('search', query.search.trim());
+      params = params.set(
+        'search',
+        query.search.trim()
+      );
     }
 
     if (query.sort) {
-      params = params.set('sort', query.sort);
+      params = params.set(
+        'sort',
+        query.sort
+      );
     }
 
     if (query.page) {
-      params = params.set('page', query.page.toString());
+      params = params.set(
+        'page',
+        query.page.toString()
+      );
     }
 
     if (query.limit) {
-      params = params.set('limit', query.limit.toString());
+      params = params.set(
+        'limit',
+        query.limit.toString()
+      );
     }
 
-    if (query.minPrice !== undefined && query.minPrice !== null) {
-      params = params.set('minPrice',query.minPrice.toString());
+    if (
+      query.minPrice !== undefined &&
+      query.minPrice !== null
+    ) {
+      params = params.set(
+        'minPrice',
+        query.minPrice.toString()
+      );
     }
 
-    if (query.maxPrice !== undefined && query.maxPrice !== null) {
-      params = params.set('maxPrice', query.maxPrice.toString());
+    if (
+      query.maxPrice !== undefined &&
+      query.maxPrice !== null
+    ) {
+      params = params.set(
+        'maxPrice',
+        query.maxPrice.toString()
+      );
     }
 
-    if (query.duration?.trim()) {params = params.set('duration', query.duration.trim());
+    if (query.duration?.trim()) {
+      params = params.set(
+        'duration',
+        query.duration.trim()
+      );
     }
 
     return this.http.get<TripListResponse>(
@@ -83,7 +169,10 @@ export class TripDataService {
   }
 
   addTrip(formData: Trip): Observable<Trip> {
-    return this.http.post<Trip>(this.tripsUrl, formData);
+    return this.http.post<Trip>(
+      this.tripsUrl,
+      formData
+    );
   }
 
   getTrip(tripCode: string): Observable<Trip> {
@@ -94,17 +183,55 @@ export class TripDataService {
 
   updateTrip(formData: Trip): Observable<Trip> {
     return this.http.put<Trip>(
-      `${this.tripsUrl}/${encodeURIComponent(formData.code)}`,
+      `${this.tripsUrl}/${encodeURIComponent(
+        formData.code
+      )}`,
       formData
     );
   }
 
-  login(user: User, passwd: string): Observable<AuthResponse> {
-    return this.handleAuthAPICall('login', user, passwd);
+  getReviews(
+    tripCode: string
+  ): Observable<TripReview[]> {
+    return this.http.get<TripReview[]>(
+      `${this.tripsUrl}/${encodeURIComponent(
+        tripCode
+      )}/reviews`
+    );
   }
 
-  register(user: User, passwd: string): Observable<AuthResponse> {
-    return this.handleAuthAPICall('register', user, passwd);
+  addReview(
+    tripCode: string,
+    review: ReviewSubmission
+  ): Observable<ReviewResponse> {
+    return this.http.post<ReviewResponse>(
+      `${this.tripsUrl}/${encodeURIComponent(
+        tripCode
+      )}/reviews`,
+      review
+    );
+  }
+
+  login(
+    user: User,
+    passwd: string
+  ): Observable<AuthResponse> {
+    return this.handleAuthAPICall(
+      'login',
+      user,
+      passwd
+    );
+  }
+
+  register(
+    user: User,
+    passwd: string
+  ): Observable<AuthResponse> {
+    return this.handleAuthAPICall(
+      'register',
+      user,
+      passwd
+    );
   }
 
   private handleAuthAPICall(
