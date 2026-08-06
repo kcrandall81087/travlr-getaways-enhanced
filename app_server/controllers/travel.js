@@ -1,5 +1,6 @@
 /* GET travel page */
 const travel = async (req, res) => {
+  const apiBaseUrl = `${req.protocol}://${req.get('host')}/api`;
   const {
     search = '',
     sort = 'name',
@@ -31,7 +32,7 @@ const travel = async (req, res) => {
     params.set('duration', duration.trim());
   }
 
-  const url = `http://localhost:3000/api/trips?${params.toString()}`;
+  const url = `${apiBaseUrl}/trips?${params.toString()}`;
 
   try {
     const response = await fetch(url);
@@ -148,14 +149,13 @@ const travel = async (req, res) => {
 /* GET individual trip details page */
 const tripDetails = async (req, res) => {
   const { tripCode } = req.params;
+  const apiBaseUrl = `${req.protocol}://${req.get('host')}/api`;
 
   const tripUrl =
-    `http://localhost:3000/api/trips/` +
-    `${encodeURIComponent(tripCode)}`;
+    `${apiBaseUrl}/trips/${encodeURIComponent(tripCode)}`;
 
   const reviewsUrl =
-    `http://localhost:3000/api/trips/` +
-    `${encodeURIComponent(tripCode)}/reviews`;
+    `${apiBaseUrl}/trips/${encodeURIComponent(tripCode)}/reviews`;
 
   try {
     const [tripResponse, reviewsResponse] =
