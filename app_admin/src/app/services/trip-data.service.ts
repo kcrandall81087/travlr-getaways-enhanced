@@ -81,7 +81,8 @@ export interface TripStatistics {
   providedIn: 'root'
 })
 export class TripDataService {
-  private readonly baseUrl = 'http://localhost:3000/api';
+  private readonly baseUrl =
+  'https://kevincrandall-travlr-d3d5e0hehrfbg8es.eastus2-01.azurewebsites.net/api';
   private readonly tripsUrl = `${this.baseUrl}/trips`;
   private readonly categoriesUrl = `${this.baseUrl}/categories`;
 

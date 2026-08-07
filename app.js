@@ -78,7 +78,10 @@ app.use(passport.initialize());
 app.use(
   '/api',
   cors({
-    origin: 'http://localhost:4200',
+    origin: [
+      'http://localhost:4200',
+      'https://gray-river-0b4fa490f.7.azurestaticapps.net'
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
   })
