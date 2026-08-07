@@ -80,7 +80,9 @@ app.use(
   cors({
     origin: [
       'http://localhost:4200',
-      'https://gray-river-0b4fa490f.7.azurestaticapps.net'
+      'https://gray-river-0b4fa490f.7.azurestaticapps.net',
+      'https://admin.kevincrandall.dev',
+      'https://kevincrandall.dev'
     ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
