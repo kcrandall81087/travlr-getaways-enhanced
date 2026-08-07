@@ -82,7 +82,7 @@ export interface TripStatistics {
 })
 export class TripDataService {
   private readonly baseUrl =
-  'https://kevincrandall.dev/api';
+  'https://travlr.kevincrandall.dev/api';
   private readonly tripsUrl = `${this.baseUrl}/trips`;
   private readonly categoriesUrl = `${this.baseUrl}/categories`;
 
